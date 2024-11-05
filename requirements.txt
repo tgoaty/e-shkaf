@@ -1,2 +1,5 @@
 pip~=24.2
 attrs~=24.2.0
+aiogram~=3.13.1
+requests~=2.32.3
+python-dotenv~=1.0.1
