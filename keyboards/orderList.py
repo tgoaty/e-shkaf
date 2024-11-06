@@ -1,8 +1,10 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-order_list_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton("Главное меню")]
-    ],
-    resize_keyboard=True
-)
+
+def orderList_menu():
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Главное меню")]
+        ],
+        resize_keyboard=True
+    )
