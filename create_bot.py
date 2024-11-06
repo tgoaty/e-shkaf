@@ -5,12 +5,16 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 
+from db_handler import db_class
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# на будущее
+db = db_class.Database()
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 scheduler = AsyncIOScheduler(timezone='Asia/Barnaul')
 
 # извлечение админов из .env
