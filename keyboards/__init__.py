@@ -4,5 +4,10 @@ from .order import order_menu
 from .orderList import orderList_menu
 from .auth import auth
 
-
-__all__ = ["main_menu", "profile_menu", "order_menu", "orderList_menu", "auth"]
+__all__ = [
+    "main_menu",
+    "profile_menu",
+    "order_menu",
+    "orderList_menu",
+    "auth"
+]

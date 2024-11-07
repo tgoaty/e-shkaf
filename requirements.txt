@@ -3,3 +3,5 @@ attrs~=24.2.0
 aiogram~=3.13.1
 requests~=2.32.3
 python-dotenv~=1.0.1
+asyncpg~=0.30.0
+APScheduler~=3.10.4

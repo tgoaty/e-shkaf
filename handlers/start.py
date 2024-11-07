@@ -7,5 +7,10 @@ start_router = Router()
 
 @start_router.message(F.text == '/start')
 async def cmd_start_3(message: Message):
-    await message.answer('Старт', reply_markup=auth())
+    await message.answer('Для начала работы поделитесь своим номером.', reply_markup=auth())
 
+@start_router.message(F.contact)
+async def handle_contact(message: Message):
+    contact = message.contact
+    user_phone_number = contact.phone_number
+    await message.answer(user_phone_number)
