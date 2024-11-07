@@ -6,7 +6,7 @@ from keyboards import order_menu
 order_router = Router()
 
 
-@order_router.message(F.text == '/start')
+@order_router.message(F.text == '/order')
 async def cmd_start_3(message: Message):
     await message.answer('Запуск сообщения по команде /start_3 используя магический фильтр F.text!',
                          reply_markup=order_menu())

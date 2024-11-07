@@ -1,5 +1,5 @@
 import asyncio
-from create_bot import bot, dp, scheduler
+from create_bot import bot, dp
 from handlers import menu_router, order_router, orderList_router, profile_router, request_router, start_router
 
 

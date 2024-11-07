@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # на будущее
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-scheduler = AsyncIOScheduler(timezone='Asia/Barnaul')
+# from apscheduler.schedulers.asyncio import AsyncIOScheduler
+# scheduler = AsyncIOScheduler(timezone='Asia/Barnaul')
 
 # извлечение админов из .env
 admins = [int(admin_id) for admin_id in getenv('ADMINS').split(',')]
