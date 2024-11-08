@@ -2,13 +2,10 @@ import aiohttp
 import os
 import logging
 
-import requests
 from dotenv import load_dotenv
 
-# Загрузка переменных окружения из .env
 load_dotenv()
 
-# Настройка логгера
 logger = logging.getLogger(__name__)
 
 class BitrixAPI:
@@ -52,14 +49,10 @@ class BitrixAPI:
         }
         result = await self._request(method, params)
 
-        if result["result"]:  # Ожидаем список ID компаний
+        if result["result"]:
             company_id = result["result"]["COMPANY"][0]
-            if company_id:
-                logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
-                return company_id
-            else:
-                logger.info(f"Компании с номером телефона {phone_number} не найдены.")
-                return None
+            logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
+            return company_id
         else:
-            logger.warning("Не удалось получить ответ от API.")
+            logger.info(f"Компании с номером телефона {phone_number} не найдены.")
             return None

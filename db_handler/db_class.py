@@ -3,10 +3,8 @@ import os
 import logging
 from dotenv import load_dotenv
 
-# Загрузка переменных окружения из .env
 load_dotenv()
 
-# Настройка логгера
 logger = logging.getLogger(__name__)
 
 class Database:
@@ -67,19 +65,19 @@ class Database:
         CREATE TABLE IF NOT EXISTS user_contact_company (
             chat_id BIGINT PRIMARY KEY,
             phone_number TEXT NOT NULL,
-            company_id_by_contact BIGINT  -- добавляем новый столбец
+            company_id BIGINT
         );
         """
         await self.execute(create_table_query)
         logger.info("Таблица user_contacts создана или уже существует.")
 
-    async def add_contact(self, chat_id: int, phone_number: str, company_id_by_contact: int):
+    async def add_contact(self, chat_id: int, phone_number: str, company_id: int):
         """Добавляет контакт в таблицу user_contacts с учетом company_id_by_contact"""
         insert_query = """
-        INSERT INTO user_contact_company (chat_id, phone_number, company_id_by_contact)
+        INSERT INTO user_contact_company (chat_id, phone_number, company_id)
         VALUES ($1, $2, $3)
-        ON CONFLICT (chat_id) DO UPDATE SET phone_number = $2, company_id_by_contact = $3;
+        ON CONFLICT (chat_id) DO UPDATE SET phone_number = $2, company_id = $3;
         """
-        await self.execute(insert_query, chat_id, phone_number, company_id_by_contact)
+        await self.execute(insert_query, chat_id, phone_number, company_id)
         logger.info(
-            f"Контакт с chat_id={chat_id}, номером телефона={phone_number} и company_id={company_id_by_contact} добавлен в базу данных.")
+            f"Контакт с chat_id={chat_id}, номером телефона={phone_number} и company_id={company_id} добавлен в базу данных.")

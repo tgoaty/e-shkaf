@@ -4,7 +4,7 @@ from handlers import auth_router, menu_router, order_router, orderList_router, p
     start_router
 
 
-# from work_time.time_func import send_time_msg
+
 
 async def main():
     dp.include_routers(

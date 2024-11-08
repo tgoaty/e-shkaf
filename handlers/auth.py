@@ -5,6 +5,7 @@ from keyboards import main_menu, help_menu
 
 auth_router = Router()
 
+
 @auth_router.message(F.contact)
 async def handle_contact(message: Message):
     contact = message.contact
@@ -14,12 +15,14 @@ async def handle_contact(message: Message):
     # TODO сделать другую анимацию
     search_message = await message.answer('Поиск компании...')
 
-    company_id_by_contact = await bitrix.get_company_by_phone(user_phone_number)
-    if company_id_by_contact:
-        async with db:
-            await db.add_contact(chat_id, user_phone_number, company_id_by_contact)
+    company_id = await bitrix.get_company_by_phone(user_phone_number)
+    if company_id:
         await search_message.delete()
-        await message.answer('Вы успешно вошли в Личный кабинет', reply_markup=main_menu())
+        await message.answer('Вы успешно вошли в Личный кабинет!', reply_markup=main_menu())
+        async with db:
+            await db.add_contact(chat_id, user_phone_number, company_id)
+
     else:
         await search_message.delete()
-        await message.answer('Не удалось найти компанию привязанную к вашему номеру. Обратитесь в нашу поддержку.', reply_markup=help_menu())
+        await message.answer('Не удалось найти компанию привязанную к вашему номеру. Обратитесь в нашу поддержку.',
+                             reply_markup=help_menu())
