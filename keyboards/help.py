@@ -1,10 +1,10 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
-def auth_menu():
+def help_menu():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Поделиться номером", request_contact=True)],
+            [KeyboardButton(text="Поддержка")],
 
         ],
         resize_keyboard=True

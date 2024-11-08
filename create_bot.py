@@ -6,6 +6,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 
+from bitrix_api.bitrix import BitrixAPI
 from db_handler import db_class  # Импортируем наш класс базы данных
 from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -32,3 +33,5 @@ dp = Dispatcher(storage=MemoryStorage())
 # Инициализируем объект базы данных
 db = db_class.Database()
 
+# Инициализируем объект Битрикс API
+bitrix = BitrixAPI()
