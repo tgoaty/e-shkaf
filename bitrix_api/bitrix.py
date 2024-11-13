@@ -8,6 +8,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 class BitrixAPI:
     def __init__(self):
         self.base_url = os.getenv("BITRIX_BASE_URL")
@@ -44,15 +45,90 @@ class BitrixAPI:
         """
         method = 'crm.duplicate.findbycomm'
         params = {
-            'type': 'PHONE',  # Поиск по типу "PHONE"
+            'type': 'PHONE',
             'values[]': phone_number
         }
         result = await self._request(method, params)
 
-        if result["result"]:
+        if result.get("result"):
             company_id = result["result"]["COMPANY"][0]
             logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
             return company_id
         else:
             logger.info(f"Компании с номером телефона {phone_number} не найдены.")
             return None
+
+    async def get_orders_by_company_id(self, company_id):
+        """
+        Получает заказы компании по её ID с полями: наименование, статус, ID и процент оплаты.
+
+        :param company_id: ID компании
+        :return: Список заказов или None, если произошла ошибка
+        """
+        method = 'crm.deal.list'
+        params = {
+            'filter[COMPANY_ID]': company_id,
+            'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
+        }
+
+        result = await self._request(method, params)
+
+        if result and result.get("result"):
+            orders = [
+                {
+                    "id": order["ID"],
+                    "title": order["TITLE"],
+                    "status": order["STAGE_ID"],
+                    "amount": order.get("OPPORTUNITY", 0)
+                }
+                for order in result["result"]
+            ]
+            logger.info(f"Найдено {len(orders)} заказов для компании с ID={company_id}.")
+            return orders
+        else:
+            logger.info(f"Заказы для компании с ID={company_id} не найдены.")
+            return None
+
+    async def get_order_details(self, order_id):
+        method = 'crm.deal.get'
+        params = {
+            'id': order_id,
+            'select[]': ['TITLE', 'OPPORTUNITY', 'CLOSEDATE', 'STAGE_ID', 'COMMENTS']
+        }
+        result = await self._request(method, params)
+
+        if result and result.get("result"):
+            order = result["result"]
+
+            products = await self._get_order_products(order_id)
+
+            order_details = {
+                "id": order["ID"],
+                "title": order["TITLE"],
+                "amount": order.get("OPPORTUNITY", 0),
+                "close_date": order.get("CLOSEDATE", "Не указана"),
+                "status": order.get("STAGE_ID"),
+                "products": products,
+                "description": order.get("COMMENTS", "Описание отсутствует")
+            }
+            logger.info(f"Получены детали для заказа с ID={order_id}.")
+            return order_details
+        else:
+            logger.info(f"Детали для заказа с ID={order_id} не найдены.")
+            return None
+
+    async def _get_order_products(self, order_id):
+        method = 'crm.deal.productrows.get'
+        params = {'id': order_id}
+        result = await self._request(method, params)
+
+        if result and result.get("result"):
+            products = [
+                f"{product['PRODUCT_NAME']} - {product['PRICE']} x {product['QUANTITY']}"
+                for product in result["result"]
+            ]
+            logger.info(f"Найдено {len(products)} продуктов для заказа с ID={order_id}.")
+            return "\n".join(products) if products else "Состав сделки не указан."
+        else:
+            logger.info(f"Продукты для заказа с ID={order_id} не найдены.")
+            return "Состав сделки не указан."
