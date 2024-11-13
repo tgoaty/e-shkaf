@@ -6,6 +6,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 
 from bitrix_api.bitrix import BitrixAPI
+from cash_memory.cash_manager import GlobalCacheManager
 from db_handler import db_class
 from dotenv import load_dotenv
 
@@ -31,3 +32,6 @@ db = db_class.Database()
 
 # Инициализируем объект Битрикс API
 bitrix = BitrixAPI()
+
+# Инициализируем объект с Кеш Хранилищем
+cache_manager = GlobalCacheManager(db, bitrix)
