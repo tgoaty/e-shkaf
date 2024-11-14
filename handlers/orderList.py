@@ -1,18 +1,10 @@
 from aiogram import Router, F
 from aiogram.enums import ChatAction
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Union
-from aiogram.fsm.context import FSMContext
-from create_bot import bot, cache_manager, logger
+from create_bot import bot, cache_manager
+from keyboards import main_menu
 
 orderList_router = Router()
-
-hello_message = (
-    """
-Список активных заказов.
-
-В активные заказы попадают те сделки, которые были полностью оплачены или оплачены частично по договоренности.
-    """
-)
 
 
 def orders_keyboard(orders):
@@ -24,7 +16,7 @@ def orders_keyboard(orders):
 
 @orderList_router.message(F.text == 'Список заказов')
 @orderList_router.callback_query(F.data == 'back_to_orders')
-async def show_orders(union: Union[Message, CallbackQuery], state: FSMContext):
+async def show_orders(union: Union[Message, CallbackQuery]):
     chat_id = union.from_user.id
     await bot.send_chat_action(chat_id, ChatAction.TYPING)
 
@@ -34,13 +26,19 @@ async def show_orders(union: Union[Message, CallbackQuery], state: FSMContext):
     orders = await cache_manager.get_orders(company_id, refresh=refresh)
 
     if isinstance(union, Message):
-        await union.answer(
-            hello_message,
-            reply_markup=orders_keyboard(orders) if orders else "Заказы не найдены."
-        )
+        if orders:
+            await union.answer(
+                "Список активных заказов:",
+                reply_markup=orders_keyboard(orders)
+            )
+        else:
+            await union.answer("Заказы не найдены.", reply_markup=main_menu())
     elif isinstance(union, CallbackQuery):
-        await union.message.edit_text(
-            hello_message,
-            reply_markup=orders_keyboard(orders) if orders else "Заказы не найдены."
-        )
+        if orders:
+            await union.message.edit_text(
+                "Список активных заказов:",
+                reply_markup=orders_keyboard(orders)
+            )
+        else:
+            await union.message.edit_text("Заказы не найдены.", reply_markup=main_menu())
         await union.answer()

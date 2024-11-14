@@ -22,4 +22,3 @@ async def handle_contact(message: Message):
     else:
         await message.answer('Не удалось найти компанию привязанную к вашему номеру. Обратитесь в нашу поддержку.',
                              reply_markup=help_menu())
-

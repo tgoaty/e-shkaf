@@ -68,6 +68,10 @@ class BitrixAPI:
         method = 'crm.deal.list'
         params = {
             'filter[COMPANY_ID]': company_id,
+            # TODO изменить под bitrix компании
+            'filter[STAGE_ID][]': ['C1:PREPARATION', 'C1:PREPAYMENT_INVOICE', 'C1:EXECUTING', 'C1:FINAL_INVOIC', 'C1:WON',
+                                 'C1:LOSE', 'C1:APOLOGY'],
+            'filter[TYPE_ID]': 'SALE',
             'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
         }
 
