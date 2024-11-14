@@ -13,7 +13,7 @@ load_dotenv()
 
 logger = get_logger(__name__)
 
-admins = [int(admin_id) for admin_id in getenv('ADMINS').split(',')]
+# admins = [int(admin_id) for admin_id in getenv('ADMINS').split(',')]
 
 bot = Bot(token=getenv('TELEGRAM_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 

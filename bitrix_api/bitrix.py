@@ -50,12 +50,18 @@ class BitrixAPI:
         }
         result = await self._request(method, params)
 
-        if result is not None and "result" in result:
-            company_id = result["result"]["COMPANY"][0]
-            logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
-            return company_id
+        # Check if the result is not None and contains the expected keys
+        if result is not None and "result" in result and "COMPANY" in result["result"]:
+            # Ensure that "COMPANY" is a list and has at least one element
+            if isinstance(result["result"]["COMPANY"], list) and result["result"]["COMPANY"]:
+                company_id = result["result"]["COMPANY"][0]
+                logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
+                return company_id
+            else:
+                logger.info(f"Компании с номером телефона {phone_number} не найдены.")
+                return None
         else:
-            logger.info(f"Компании с номером телефона {phone_number} не найдены.")
+            logger.warning(f"Unexpected result format or no company found for phone number {phone_number}: {result}")
             return None
 
     async def get_orders_by_company_id(self, company_id):
