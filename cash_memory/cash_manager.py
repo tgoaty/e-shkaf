@@ -1,7 +1,5 @@
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from db_handler.db_class import logger
-
 global_storage = MemoryStorage()
 
 class GlobalCacheManager:

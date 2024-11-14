@@ -1,12 +1,12 @@
 import aiohttp
 import os
-import logging
+from logger_config import get_logger
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class BitrixAPI:

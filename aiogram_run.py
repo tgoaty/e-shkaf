@@ -3,9 +3,6 @@ from create_bot import bot, dp
 from handlers import auth_router, menu_router, order_router, orderList_router, profile_router, \
     start_router
 
-
-
-
 async def main():
     dp.include_routers(
         auth_router,

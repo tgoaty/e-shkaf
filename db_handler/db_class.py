@@ -1,12 +1,12 @@
 import asyncpg
 import os
-import logging
+from logger_config import get_logger
 from dotenv import load_dotenv
 import asyncio
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class Database:
     def __init__(self):
