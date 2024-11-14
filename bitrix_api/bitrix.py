@@ -50,7 +50,7 @@ class BitrixAPI:
         }
         result = await self._request(method, params)
 
-        if result.get("result"):
+        if result is not None and "result" in result:
             company_id = result["result"]["COMPANY"][0]
             logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
             return company_id
@@ -132,3 +132,45 @@ class BitrixAPI:
         else:
             logger.info(f"Продукты для заказа с ID={order_id} не найдены.")
             return "Состав сделки не указан."
+
+    async def find_folder_by_order_id(self, order_id):
+        method = 'disk.folder.search'
+        params = {
+            'filter[NAME]': f'{order_id}',
+            'filter[TYPE]': 'folder'
+        }
+
+        result = await self._request(method, params)
+
+        if result and result.get("result"):
+            for folder in result["result"]:
+                folder_name = folder.get("NAME", "")
+                if result.search(f"\\b{order_id}\\b", folder_name):
+                    public_link = await self.get_public_link(folder["ID"])
+                    if public_link:
+                        logger.info(f"Найдена папка для заказа ID={order_id}, публичная ссылка: {public_link}")
+                        return public_link
+            logger.info(f"Папка с ID заказа {order_id} не найдена.")
+        return None
+
+    async def get_public_link(self, folder_id):
+
+        method = 'disk.folder.getexternallink'
+        params = {
+            'id': folder_id
+        }
+
+        result = await self._request(method, params)
+        logger.info(f"Ответ от Bitrix для папки {folder_id}: {result}")
+
+        if result is not None and "result" in result:
+            public_link = result["result"]
+            if public_link:
+                logger.info(f"Публичная ссылка для папки ID={folder_id} получена: {public_link}")
+                return public_link
+            else:
+                logger.error(f"Публичная ссылка для папки ID={folder_id} не найдена в ответе.")
+        else:
+            logger.error(f"Некорректный ответ от Bitrix для папки ID={folder_id}: {result}")
+
+        return None
