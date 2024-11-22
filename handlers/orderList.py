@@ -7,9 +7,9 @@ from keyboards import main_menu
 orderList_router = Router()
 
 
-def orders_keyboard(orders):
+def orders_keyboard(orders, refresh):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"{order['title']} - {order['status']}", callback_data=f"order_{order['id']}")]
+        [InlineKeyboardButton(text=f"{order['title']} - {order['status']}", callback_data=f"order_{order['id']}_{int(refresh)}")]
         for order in orders
     ])
 
@@ -18,7 +18,8 @@ def orders_keyboard(orders):
 @orderList_router.callback_query(F.data == 'back_to_orders')
 async def show_orders(union: Union[Message, CallbackQuery]):
     chat_id = union.from_user.id
-    await bot.send_chat_action(chat_id, ChatAction.TYPING)
+    if isinstance(union, Message):
+        await bot.send_chat_action(chat_id, ChatAction.TYPING)
 
     refresh = isinstance(union, Message)
 
@@ -29,7 +30,7 @@ async def show_orders(union: Union[Message, CallbackQuery]):
         if orders:
             await union.answer(
                 "Список активных заказов:",
-                reply_markup=orders_keyboard(orders)
+                reply_markup=orders_keyboard(orders, refresh=refresh)
             )
         else:
             await union.answer("Заказы не найдены.", reply_markup=main_menu())
@@ -37,7 +38,7 @@ async def show_orders(union: Union[Message, CallbackQuery]):
         if orders:
             await union.message.edit_text(
                 "Список активных заказов:",
-                reply_markup=orders_keyboard(orders)
+                reply_markup=orders_keyboard(orders, refresh=refresh)
             )
         else:
             await union.message.edit_text("Заказы не найдены.", reply_markup=main_menu())

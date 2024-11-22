@@ -4,6 +4,8 @@ from logger_config import get_logger
 
 from dotenv import load_dotenv
 
+from utils.status_normalization import get_normal_status_name
+
 load_dotenv()
 
 logger = get_logger(__name__)
@@ -75,8 +77,9 @@ class BitrixAPI:
         params = {
             'filter[COMPANY_ID]': company_id,
             # TODO изменить под bitrix компании
-            'filter[STAGE_ID][]': ['C1:PREPARATION', 'C1:PREPAYMENT_INVOICE', 'C1:EXECUTING', 'C1:FINAL_INVOIC', 'C1:WON',
-                                 'C1:LOSE', 'C1:APOLOGY'],
+            'filter[STAGE_ID][]': ['C1:PREPARATION', 'C1:PREPAYMENT_INVOICE', 'C1:EXECUTING', 'C1:FINAL_INVOIC',
+                                   'C1:WON',
+                                   'C1:LOSE', 'C1:APOLOGY'],
             'filter[TYPE_ID]': 'SALE',
             'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
         }
@@ -88,7 +91,7 @@ class BitrixAPI:
                 {
                     "id": order["ID"],
                     "title": order["TITLE"],
-                    "status": order["STAGE_ID"],
+                    "status": get_normal_status_name(order["STAGE_ID"]),
                     "amount": order.get("OPPORTUNITY", 0)
                 }
                 for order in result["result"]
@@ -99,28 +102,59 @@ class BitrixAPI:
             logger.info(f"Заказы для компании с ID={company_id} не найдены.")
             return None
 
+    async def get_responsible_name(self, responsible_id):
+        """Получить имя ответственного пользователя по его ID."""
+        if not responsible_id:
+            return "Не указан"
+
+        user_method = 'user.get'
+        user_params = {
+            'ID': responsible_id
+        }
+        user_result = await self._request(user_method, user_params)
+
+        if user_result and user_result.get('result'):
+            responsible_user = user_result['result'][0]
+            responsible_name = f"{responsible_user.get('NAME', '')} {responsible_user.get('LAST_NAME', '')}"
+            return responsible_name
+        else:
+            return "Не указан"
+
     async def get_order_details(self, order_id):
         method = 'crm.deal.get'
         params = {
             'id': order_id,
-            'select[]': ['TITLE', 'OPPORTUNITY', 'CLOSEDATE', 'STAGE_ID', 'COMMENTS']
+            'select[]': [
+                'TITLE', 'OPPORTUNITY', 'CLOSEDATE', 'STAGE_ID', 'COMMENTS',
+                'ASSIGNED_BY_ID', 'UF_CRM_1682643499', 'UF_CRM_1682643527', 'UF_CRM_1682643555', 'UF_CRM_1682643581'
+            ]
         }
         result = await self._request(method, params)
 
         if result and result.get("result"):
             order = result["result"]
 
-            products = await self._get_order_products(order_id)
+            responsible_id = order.get('ASSIGNED_BY_ID', None)
+            responsible_name = await self.get_responsible_name(responsible_id)
+
+            shipping_date = order.get('UF_CRM_1682643527', 'Не указана')  # Дата отгрузки
+            otk_transfer_date = order.get('UF_CRM_1682643555', 'Не указана')  # Дата передачи в ОТК
+            materials_delivery_date = order.get('UF_CRM_1682643581', 'Не указана')  # Дата поставки материалов
+            payment_percent = order.get('UF_CRM_1682643592', 'Не указан')  # Процент оплаты сделки
 
             order_details = {
                 "id": order["ID"],
                 "title": order["TITLE"],
                 "amount": order.get("OPPORTUNITY", 0),
                 "close_date": order.get("CLOSEDATE", "Не указана"),
-                "status": order.get("STAGE_ID"),
-                "products": products,
-                "description": order.get("COMMENTS", "Описание отсутствует")
+                "status": get_normal_status_name(order.get("STAGE_ID")),
+                "responsible": responsible_name,
+                "shipping_date": shipping_date,
+                "otk_transfer_date": otk_transfer_date,
+                "materials_delivery_date": materials_delivery_date,
+                "payment_percent": payment_percent,
             }
+
             logger.info(f"Получены детали для заказа с ID={order_id}.")
             return order_details
         else:
