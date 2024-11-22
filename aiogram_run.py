@@ -1,7 +1,7 @@
 import asyncio
 from create_bot import bot, dp
 from handlers import auth_router, menu_router, order_router, orderList_router, profile_router, \
-    start_router, manager_router
+    start_router, manager_router, help_router
 
 
 async def main():
@@ -12,6 +12,7 @@ async def main():
         order_router,
         profile_router,
         start_router,
+        help_router,
         manager_router
     )
     await bot.delete_webhook(drop_pending_updates=True)
