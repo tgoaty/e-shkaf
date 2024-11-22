@@ -77,9 +77,9 @@ class BitrixAPI:
         params = {
             'filter[COMPANY_ID]': company_id,
             # TODO изменить под bitrix компании
-            'filter[STAGE_ID][]': ['C1:PREPARATION', 'C1:PREPAYMENT_INVOICE', 'C1:EXECUTING', 'C1:FINAL_INVOIC',
-                                   'C1:WON',
-                                   'C1:LOSE', 'C1:APOLOGY'],
+             #'filter[STAGE_ID][]': ['C1:PREPARATION', 'C1:PREPAYMENT_INVOICE', 'C1:EXECUTING', 'C1:FINAL_INVOIC',
+             #                      'C1:WON',
+             #                     'C1:LOSE', 'C1:APOLOGY'],
             'filter[TYPE_ID]': 'SALE',
             'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
         }
@@ -91,7 +91,8 @@ class BitrixAPI:
                 {
                     "id": order["ID"],
                     "title": order["TITLE"],
-                    "status": get_normal_status_name(order["STAGE_ID"]),
+                    #"status": get_normal_status_name(order["STAGE_ID"]),
+                    "status": order["STAGE_ID"],
                     "amount": order.get("OPPORTUNITY", 0)
                 }
                 for order in result["result"]
@@ -147,7 +148,8 @@ class BitrixAPI:
                 "title": order["TITLE"],
                 "amount": order.get("OPPORTUNITY", 0),
                 "close_date": order.get("CLOSEDATE", "Не указана"),
-                "status": get_normal_status_name(order.get("STAGE_ID")),
+                #"status": get_normal_status_name(order["STAGE_ID"]),
+                "status": order.get("STAGE_ID", "Не указана"),
                 "responsible_name": responsible_name,
                 "responsible_id": responsible_id,
                 "shipping_date": shipping_date,
@@ -239,3 +241,73 @@ class BitrixAPI:
         else:
             logger.warning(f"Не удалось получить ID ответственного пользователя для компании с ID={company_id}.")
             return None
+
+    async def get_full_name_by_contact_id(self, contact_id: int) -> str:
+        """Получает данные контакта по ID и возвращает его полное имя."""
+        method = 'crm.contact.get'
+        params = {
+            'id': contact_id
+        }
+
+        try:
+            result = await self._request(method, params)
+            if result and 'result' in result:
+                contact_data = result['result']
+
+                name = contact_data.get('NAME', '')
+                second_name = contact_data.get('SECOND_NAME', '')
+                last_name = contact_data.get('LAST_NAME', '')
+
+                full_name = f"{name} {second_name} {last_name}".strip().replace('None', '')
+                logger.info(f"Извлечённое полное имя: {full_name}")
+                return full_name
+            else:
+                logger.error(f"Ошибка запроса: {result}")
+                return "Ошибка получения данных контакта"
+        except Exception as e:
+            logger.error(f"Ошибка при запросе данных контакта: {e}")
+            return "Ошибка при запросе данных контакта"
+
+    async def get_contact_id_by_company_id(self, company_id: int) -> int:
+        """Получает идентификатор контакта по идентификатору компании."""
+        method = 'crm.company.contact.items.get'
+        params = {
+            'id': company_id
+        }
+        result = await self._request(method, params)
+        if result and 'result' in result:
+            contact_items = result['result']
+            if contact_items:
+                contact_id = contact_items[0]['CONTACT_ID']
+                logger.info(f"Найден контакт с ID={contact_id} для компании с ID={company_id}.")
+                return contact_id
+            else:
+                logger.info(f"Для компании с ID={company_id} контакты не найдены.")
+        else:
+            logger.error(f"Ошибка получения контактов для компании с ID={company_id}.")
+        return None
+
+    async def get_company_title_by_id(self, company_id: int) -> str:
+        """ Получает название компании по её ID."""
+        method = 'crm.company.get'
+        params = {
+            'id': company_id
+        }
+        try:
+            result = await self._request(method, params)
+            if result and 'result' in result:
+                company_data = result['result']
+                company_title = company_data.get('TITLE', '')
+
+                if company_title:
+                    logger.info(f"Название компании: {company_title}")
+                    return company_title
+                else:
+                    logger.warning(f"Название компании отсутствует для company_id={company_id}")
+                    return "Название компании отсутствует"
+            else:
+                logger.error(f"Ошибка получения данных компании: {result}")
+                return "Ошибка получения данных компании"
+        except Exception as e:
+            logger.error(f"Ошибка при запросе данных компании: {e}")
+            return "Ошибка при запросе данных компании"
