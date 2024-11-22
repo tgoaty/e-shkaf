@@ -8,7 +8,7 @@ class GlobalCacheManager:
         self.storage = global_storage
         self.db = db
         self.bitrix = bitrix
-        self.time_to_update = 60
+        self.time_to_update = 600
 
     async def get_company_id(self, chat_id: int):
         """Получает или кэширует company_id для всех пользователей."""
@@ -23,6 +23,7 @@ class GlobalCacheManager:
         """Получает или кэширует список заказов для всех пользователей."""
         data = await self.storage.get_data(key=company_id)
         current_time = time.time()
+
 
         if refresh or "orders" not in data or current_time - data.get("orders_timestamp", 0) > self.time_to_update:
             orders = await self.bitrix.get_orders_by_company_id(company_id)

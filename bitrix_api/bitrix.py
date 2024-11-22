@@ -148,7 +148,8 @@ class BitrixAPI:
                 "amount": order.get("OPPORTUNITY", 0),
                 "close_date": order.get("CLOSEDATE", "Не указана"),
                 "status": get_normal_status_name(order.get("STAGE_ID")),
-                "responsible": responsible_name,
+                "responsible_name": responsible_name,
+                "responsible_id": responsible_id,
                 "shipping_date": shipping_date,
                 "otk_transfer_date": otk_transfer_date,
                 "materials_delivery_date": materials_delivery_date,
@@ -218,3 +219,23 @@ class BitrixAPI:
             logger.error(f"Некорректный ответ от Bitrix для папки ID={folder_id}: {result}")
 
         return None
+
+    async def get_assigned_by_id(self, company_id):
+        """
+        Получает ID ответственного пользователя (ASSIGNED_BY_ID) для указанной компании.
+        """
+        method = 'crm.company.get'
+        params = {
+            'id': company_id,
+            'select': ['ASSIGNED_BY_ID']
+        }
+
+        result = await self._request(method, params)
+
+        if result and result.get("result"):
+            assigned_by_id = result["result"].get("ASSIGNED_BY_ID")
+            logger.info(f"ID ответственного пользователя для компании с ID={company_id}: {assigned_by_id}.")
+            return assigned_by_id
+        else:
+            logger.warning(f"Не удалось получить ID ответственного пользователя для компании с ID={company_id}.")
+            return None

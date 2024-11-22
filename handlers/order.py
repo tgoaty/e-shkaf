@@ -17,23 +17,24 @@ async def show_order_details(callback_query: CallbackQuery):
         await callback_query.answer("Не удалось найти информацию по заказу.", show_alert=True)
         return
 
-    back_button = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Перейти к папке заказа", callback_data=f"generate_link_{order_id}")],
-        [InlineKeyboardButton(text="Вернуться к списку заказов", callback_data="back_to_orders")]
-    ])
+
 
     description = (
         f"ID: {details['id']}\n"
         f"Наименование сделки: {details['title']}\n"
         f"Статус сделки: {details['status']}\n"
-        f"Ответственный: {details['responsible']}\n"
+        f"Ответственный: {details['responsible_name']}\n"
         f"Сумма сделки: {details['amount']}\n"
         f"Дата отгрузки: {details['shipping_date']}\n"
         f"Дата передачи в ОТК: {details['otk_transfer_date']}\n"
         f"Дата поставки материалов: {details['materials_delivery_date']}\n"
         f"Процент оплаты сделки: {details['payment_percent']}\n"
     )
-
+    back_button = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Перейти к папке заказа", callback_data=f"generate_link_{order_id}")],
+        [InlineKeyboardButton(text="Связаться с менеджером", callback_data=f"manager_{details['responsible_id']}_{details['id']}")],
+        [InlineKeyboardButton(text="Вернуться к списку заказов", callback_data="back_to_orders")]
+    ])
     await callback_query.message.edit_text(description, reply_markup=back_button)
     await callback_query.answer()
 

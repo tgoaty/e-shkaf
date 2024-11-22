@@ -1,11 +1,11 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
-def order_menu():
+def manager_menu():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Вернуться к списку")],
-            [KeyboardButton(text="Главное меню")]
+            [KeyboardButton(text="Список заказов")],
+            [KeyboardButton(text="Профиль")]
         ],
         resize_keyboard=True
     )
