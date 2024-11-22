@@ -52,9 +52,7 @@ class BitrixAPI:
         }
         result = await self._request(method, params)
 
-        # Check if the result is not None and contains the expected keys
         if result is not None and "result" in result and "COMPANY" in result["result"]:
-            # Ensure that "COMPANY" is a list and has at least one element
             if isinstance(result["result"]["COMPANY"], list) and result["result"]["COMPANY"]:
                 company_id = result["result"]["COMPANY"][0]
                 logger.info(f"Найдена компания ID={company_id} с номером телефона {phone_number}.")
@@ -67,12 +65,7 @@ class BitrixAPI:
             return None
 
     async def get_orders_by_company_id(self, company_id):
-        """
-        Получает заказы компании по её ID с полями: наименование, статус, ID и процент оплаты.
-
-        :param company_id: ID компании
-        :return: Список заказов или None, если произошла ошибка
-        """
+        """Получает заказы компании по её ID с полями: наименование, статус, ID и процент оплаты."""
         method = 'crm.deal.list'
         params = {
             'filter[COMPANY_ID]': company_id,
@@ -120,6 +113,37 @@ class BitrixAPI:
             return responsible_name
         else:
             return "Не указан"
+
+    async def get_site_by_assigned_id(self, assigned_by_id):
+        """Получает телеграмм ответственного менеджера по его ID (ASSIGNED_BY_ID)."""
+        if not assigned_by_id:
+            logger.warning("Не указан ASSIGNED_BY_ID.")
+            return "Не указан ASSIGNED_BY_ID"
+
+        method = 'user.get'
+        params = {
+            'ID': assigned_by_id
+        }
+
+        try:
+            result = await self._request(method, params)
+            if result and 'result' in result and result['result']:
+                user_data = result['result'][0]
+                user_site = user_data.get('PERSONAL_WWW', None)
+
+                if user_site:
+                    logger.info(f"Сайт для пользователя с ID={assigned_by_id}: {user_site}")
+                    return user_site
+                else:
+                    logger.warning(f"Сайт для пользователя с ID={assigned_by_id} отсутствует.")
+                    return "Сайт не указан"
+            else:
+                logger.error(f"Ошибка при запросе пользователя с ID={assigned_by_id}: {result}")
+                return "Ошибка получения данных пользователя"
+        except Exception as e:
+            logger.error(f"Ошибка при запросе данных пользователя: {e}")
+            return "Ошибка при запросе данных пользователя"
+
 
     async def get_order_details(self, order_id):
         method = 'crm.deal.get'

@@ -15,7 +15,8 @@ async def cmd_start_3(message: Message):
     contact_id = await bitrix.get_contact_id_by_company_id(company_id)
 
     full_name = await bitrix.get_full_name_by_contact_id(contact_id)
-    manager = await bitrix.get_assigned_by_id(company_id)
+    manager_id = await bitrix.get_assigned_by_id(company_id)
+    manager_name = await bitrix.get_responsible_name(manager_id)
     company_title = await bitrix.get_company_title_by_id(company_id)
 
     default_discount = None
@@ -25,7 +26,7 @@ async def cmd_start_3(message: Message):
 
     await message.answer(
         f'''{full_name}
-Менеджер: {manager}
+Менеджер: {manager_name}
 Организация: {company_title}
 Заказы в работе: {len(orders)}
 Сумма заказов: {sum([float(order["amount"]) for order in orders])}
