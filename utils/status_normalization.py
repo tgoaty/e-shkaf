@@ -1,12 +1,13 @@
 def get_normal_status_name(status_name):
+
     translate = {
-        'C1:PREPARATION': 'Подготовка документов',
-        'C1:PREPAYMENT_INVOICE': 'Счёт на предоплату',
-        'C1:EXECUTING': 'В работе',
-        'C1:FINAL_INVOIC': 'Финальный счет',
-        'C1:WON': 'Сделка успешна',
-        'C1:LOSE': 'Сделка провалена',
-        'C1:APOLOGY': 'Анализ причины провала'
+        'C2:PREPARATION': 'Подготовка документов',
+        'C2:PREPAYMENT_INVOICE': 'Счёт на предоплату',
+        'C2:EXECUTING': 'В работе',
+        'C2:FINAL_INVOIC': 'Финальный счет',
+        'C2:WON': 'Сделка успешна',
+        'C2:LOSE': 'Сделка провалена',
+        'C2:APOLOGY': 'Анализ причины провала'
 
     }
-    return translate[status_name]
+    return translate.get(status_name, status_name)

@@ -84,8 +84,7 @@ class BitrixAPI:
                 {
                     "id": order["ID"],
                     "title": order["TITLE"],
-                    #"status": get_normal_status_name(order["STAGE_ID"]),
-                    "status": order["STAGE_ID"],
+                    "status": get_normal_status_name(order["STAGE_ID"]),
                     "amount": order.get("OPPORTUNITY", 0)
                 }
                 for order in result["result"]
@@ -172,8 +171,7 @@ class BitrixAPI:
                 "title": order["TITLE"],
                 "amount": order.get("OPPORTUNITY", 0),
                 "close_date": order.get("CLOSEDATE", "Не указана"),
-                #"status": get_normal_status_name(order["STAGE_ID"]),
-                "status": order.get("STAGE_ID", "Не указана"),
+                "status": get_normal_status_name(order["STAGE_ID"]),
                 "responsible_name": responsible_name,
                 "responsible_id": responsible_id,
                 "shipping_date": shipping_date,
