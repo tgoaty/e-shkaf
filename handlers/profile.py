@@ -25,7 +25,7 @@ async def show_profile(message: Message) -> None:
         manager_name = await bitrix.get_responsible_name(manager_id)
     else:
         manager_name = ''
-    company_title = await bitrix.get_company_title_by_id(company_id)
+    company_info = await bitrix.get_company_title_and_inn_by_id(company_id)
 
     orders = orders or []
     total_orders_amount = sum(float(order.get("amount", 0)) for order in orders)
@@ -33,10 +33,11 @@ async def show_profile(message: Message) -> None:
 
     profile_text = (
         f"{full_name}\n"
-        f"Организация: {company_title}\n"
+        f"Организация: {company_info["company_title"]}\n"
+        f"ИНН: {company_info["inn"]}\n"
         f"Заказы в работе: {len(orders)}\n"
         f"Сумма заказов: {total_orders_amount}\n"
-        f"Ваша скидка: {default_discount}%"
+        f"Ваша скидка: {default_discount}%\n"
         f"Менеджер: {manager_name}\n"
     )
 

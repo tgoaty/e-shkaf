@@ -299,9 +299,9 @@ class BitrixAPI:
         logger.error(f"Ошибка получения контактов для компании с ID={company_id}.")
         return None
 
-    async def get_company_title_by_id(self, company_id: int) -> str:
+    async def get_company_title_and_inn_by_id(self, company_id: int) -> dict:
         """
-        Получает название компании по её ID.
+        Получает название компании по её ID и ИНН из поля UF_CRM_6658A426B3467.
         """
         method = 'crm.company.get'
         params = {'id': company_id}
@@ -309,11 +309,19 @@ class BitrixAPI:
         result = await self._request(method, params)
 
         if self._check_response(result, "result"):
-            company_title = result["result"].get("TITLE", "")
-            logger.info(f"Название компании с ID={company_id}: {company_title}")
-            return company_title
-        logger.warning(f"Название компании для ID={company_id} не найдено.")
-        return "Название компании отсутствует"
+            company_data = result["result"]
+            company_title = company_data.get("TITLE", "")
+            inn = company_data.get("UF_CRM_6658A426B3467", "")
+
+            logger.info(f"Название компании с ID={company_id}: {company_title}, ИНН: {inn}")
+
+            return {
+                "company_title": company_title if company_title else "Название компании отсутствует",
+                "inn": inn if inn else "ИНН отсутствует"
+            }
+        else:
+            logger.warning(f"Компания с ID={company_id} не найдена.")
+            return {"company_title": "Название компании отсутствует", "inn": "ИНН отсутствует"}
 
     async def get_all_deal_categories_and_stages(self):
         """
