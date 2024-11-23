@@ -6,7 +6,7 @@
 2. Склонировать репозиторий ```git clone https://github.com/tgoaty/e-shkaf```
 3. Установить все зависимости ```pip install -r requirements.txt```
 4. Развернуть PostgresSQL Базу данных
-5. Созадать в корне проекта и заполнить файл .env по образцу:
+5. Создать в корне проекта и заполнить файл .env по образцу:
     ```
     TELEGRAM_TOKEN=<ТОКЕН БОТА>
 
@@ -15,5 +15,6 @@
 
     PG_LINK=<ССЫЛКА ДЛЯ РАБОТЫ С БАЗОЙ ДАННЫХ>
    ```
-6. Запустить бота ```python aiogram_run.py```
+6. В фале handlers/help.py указать username специалиста техподдержки
+7. Запустить бота ```python aiogram_run.py```
 

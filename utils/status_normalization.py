@@ -1,7 +1,9 @@
 def get_normal_status_name(status_name):
-
+    """
+    Перевод стадий на русский.
+    """
     translate = {
-        'C2:PREPARATION': 'Подготовка документов',
+        'PREPARATION': 'Подготовка документов',
         'C2:PREPAYMENT_INVOICE': 'Счёт на предоплату',
         'C2:EXECUTING': 'В работе',
         'C2:FINAL_INVOIC': 'Финальный счет',

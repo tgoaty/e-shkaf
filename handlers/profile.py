@@ -6,30 +6,32 @@ from create_bot import bitrix, cache_manager
 profile_router = Router()
 
 
-@profile_router.message(F.text == 'Профиль')
-async def cmd_start_3(message: Message):
+@profile_router.message(F.text == "Профиль")
+async def show_profile(message: Message) -> None:
+    """
+    Вывод общей информации о клиенте.
+    """
     chat_id = message.from_user.id
 
     company_id = await cache_manager.get_company_id(chat_id)
     orders = await cache_manager.get_orders(company_id)
     contact_id = await bitrix.get_contact_id_by_company_id(company_id)
-
     full_name = await bitrix.get_full_name_by_contact_id(contact_id)
     manager_id = await bitrix.get_assigned_by_id(company_id)
     manager_name = await bitrix.get_responsible_name(manager_id)
     company_title = await bitrix.get_company_title_by_id(company_id)
 
-    default_discount = None
+    orders = orders or []
+    total_orders_amount = sum(float(order.get("amount", 0)) for order in orders)
+    default_discount = 0
 
-    if not orders:
-        orders = []
-
-    await message.answer(
-        f'''{full_name}
-Менеджер: {manager_name}
-Организация: {company_title}
-Заказы в работе: {len(orders)}
-Сумма заказов: {sum([float(order["amount"]) for order in orders])}
-Ваша скидка: {default_discount}%''',
-        reply_markup=profile_menu()
+    profile_text = (
+        f"{full_name}\n"
+        f"Менеджер: {manager_name}\n"
+        f"Организация: {company_title}\n"
+        f"Заказы в работе: {len(orders)}\n"
+        f"Сумма заказов: {total_orders_amount}\n"
+        f"Ваша скидка: {default_discount}%"
     )
+
+    await message.answer(profile_text, reply_markup=profile_menu())

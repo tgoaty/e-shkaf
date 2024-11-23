@@ -1,3 +1,4 @@
+# Пакет с клавиатурами
 from .auth import auth_menu
 from .menu import main_menu
 from .profile import profile_menu

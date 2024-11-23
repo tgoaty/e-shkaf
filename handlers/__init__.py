@@ -1,5 +1,5 @@
+# Пакет с обработчиками сообщений
 from .auth import auth_router
-from .menu import menu_router
 from .profile import profile_router
 from .order import order_router
 from .orderList import orderList_router
@@ -10,7 +10,6 @@ from .manager import manager_router
 
 __all__ = [
     "auth_router",
-    "menu_router",
     "profile_router",
     "order_router",
     "orderList_router",

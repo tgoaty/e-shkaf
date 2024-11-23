@@ -13,14 +13,27 @@ load_dotenv()
 
 logger = get_logger(__name__)
 
-# admins = [int(admin_id) for admin_id in getenv('ADMINS').split(',')]
+TELEGRAM_TOKEN = getenv('TELEGRAM_TOKEN')
+if not TELEGRAM_TOKEN:
+    logger.error("Не удалось получить TELEGRAM_TOKEN из переменных окружения.")
+    raise ValueError("TELEGRAM_TOKEN не найден в переменных окружения")
 
-bot = Bot(token=getenv('TELEGRAM_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=TELEGRAM_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 dp = Dispatcher(storage=MemoryStorage())
 
-db = db_class.Database()
+try:
+    db = db_class.Database()
+except Exception as e:
+    logger.error(f"Ошибка при инициализации базы данных: {e}")
+    raise
 
-bitrix = BitrixAPI()
+try:
+    bitrix = BitrixAPI()
+except Exception as e:
+    logger.error(f"Ошибка при инициализации Bitrix API: {e}")
+    raise
 
 cache_manager = GlobalCacheManager(db, bitrix)
+
+logger.info("Все компоненты успешно инициализированы.")
