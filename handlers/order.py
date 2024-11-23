@@ -20,11 +20,12 @@ async def show_order_details(callback_query: CallbackQuery) -> None:
         return
 
     description = (
-        f"**ID:** {details['id']}\n"
         f"**Наименование сделки:** {details['title']}\n"
         f"**Статус сделки:** {details['status']}\n"
         f"**Ответственный:** {details['responsible_name']}\n"
+        f"**ID:** {details['id']}\n"
         f"**Сумма сделки:** {details['amount']}\n"
+        f"**Ответственный РП** {details['responsible_rp']}\n"
         f"**Дата отгрузки:** {details['shipping_date']}\n"
         f"**Дата передачи в ОТК:** {details['otk_transfer_date']}\n"
         f"**Дата поставки материалов:** {details['materials_delivery_date']}\n"

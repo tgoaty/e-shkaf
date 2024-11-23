@@ -160,17 +160,20 @@ class BitrixAPI:
             return order.get(field, default)
 
         order_details = {
-            "id": order["ID"],
             "title": order["TITLE"],
-            "amount": order.get("OPPORTUNITY", 0),
-            "close_date": get_field_value('CLOSEDATE'),
             "status": await get_normal_status_name(order["STAGE_ID"]),
             "responsible_name": responsible_name,
+            "id": order["ID"],
+            "amount": order.get("OPPORTUNITY", 0),
+            "responsible_rp": order.get("UF_CRM_1591784142", "Не указан"),                               # Ответственный РП
+            "shipping_date": get_field_value('UF_CRM_1593059797889', "Не указан"),           # Дата отгрузки
+            "otk_transfer_date": get_field_value('UF_CRM_1593059727643', "Не указан"),       # Дата передачи в ОТК
+            "materials_delivery_date": get_field_value('UF_CRM_1593016707093', "Не указан"), # Дата поставки материалов
+
+            "payment_percent": get_field_value('UF_CRM_1682643592', "Не указан"),         # Процент оплаты сделки
+
             "responsible_id": responsible_id,
-            "shipping_date": get_field_value('UF_CRM_1682643527'),
-            "otk_transfer_date": get_field_value('UF_CRM_1682643555'),
-            "materials_delivery_date": get_field_value('UF_CRM_1682643581'),
-            "payment_percent": get_field_value('UF_CRM_1682643592', "Не указан"),
+
         }
 
         logger.info(f"Получены детали для заказа с ID={order_id}.")
