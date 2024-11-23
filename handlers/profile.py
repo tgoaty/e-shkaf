@@ -33,11 +33,11 @@ async def show_profile(message: Message) -> None:
 
     profile_text = (
         f"{full_name}\n"
-        f"Менеджер: {manager_name}\n"
         f"Организация: {company_title}\n"
         f"Заказы в работе: {len(orders)}\n"
         f"Сумма заказов: {total_orders_amount}\n"
         f"Ваша скидка: {default_discount}%"
+        f"Менеджер: {manager_name}\n"
     )
 
     await message.answer(profile_text, reply_markup=profile_menu())
