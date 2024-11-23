@@ -15,6 +15,20 @@ class Database:
         self._db_url = os.getenv("PG_LINK")
         self._reconnect_delay = 1
         logger.info("Создан экземпляр Database с URL: %s", self._db_url)
+        asyncio.run(self.connect_and_create_table())
+
+    async def connect_and_create_table(self):
+        """
+        Метод для подключения и создания таблицы при инициализации объекта.
+        """
+        try:
+            self._pool = await asyncpg.create_pool(dsn=self._db_url)
+            logger.info("Подключение к базе данных установлено")
+
+            await self.create_table()
+        except Exception as e:
+            logger.error("Ошибка подключения к базе данных: %s", e)
+            raise
 
     async def __aenter__(self):
         await self.connect()
@@ -30,7 +44,6 @@ class Database:
         try:
             self._pool = await asyncpg.create_pool(dsn=self._db_url)
             logger.info("Подключение к базе данных установлено")
-            await self.create_table()
         except Exception as e:
             logger.error("Ошибка подключения к базе данных: %s", e)
             raise

@@ -59,3 +59,14 @@ class GlobalCacheManager:
             return await self.bitrix.get_order_details(order_id)
 
         return await self._update_cache(order_id, "details", fetch_order_details, refresh)
+
+    async def get_deal_categories(self, refresh: bool = False) -> list:
+        """
+        Получает или кэширует список категорий сделок.
+        """
+
+        async def fetch_deal_categories():
+            return await self.bitrix.get_all_deal_categories_and_stages()
+
+
+        return await self._update_cache("deal_categories", "categories", fetch_deal_categories, refresh)

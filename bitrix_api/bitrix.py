@@ -76,13 +76,18 @@ class BitrixAPI:
                 {
                     "id": order["ID"],
                     "title": order["TITLE"],
-                    "status": get_normal_status_name(order["STAGE_ID"]),
+                    "status": await get_normal_status_name(order["STAGE_ID"]),
                     "amount": order.get("OPPORTUNITY", 0)
                 }
                 for order in result["result"]
             ]
+            # убираем не нужные стадии
+            orders = [order for order in orders if order["status"] not in ['Собрать информацию для ТКП']]
             logger.info(f"Найдено {len(orders)} заказов для компании с ID={company_id}.")
-            return orders
+            if len(orders) > 0:
+                return orders
+            else:
+                return None
         logger.info(f"Заказы для компании с ID={company_id} не найдены.")
         return None
 
@@ -159,7 +164,7 @@ class BitrixAPI:
             "title": order["TITLE"],
             "amount": order.get("OPPORTUNITY", 0),
             "close_date": get_field_value('CLOSEDATE'),
-            "status": get_normal_status_name(order["STAGE_ID"]),
+            "status": await get_normal_status_name(order["STAGE_ID"]),
             "responsible_name": responsible_name,
             "responsible_id": responsible_id,
             "shipping_date": get_field_value('UF_CRM_1682643527'),
@@ -306,3 +311,38 @@ class BitrixAPI:
             return company_title
         logger.warning(f"Название компании для ID={company_id} не найдено.")
         return "Название компании отсутствует"
+
+    async def get_all_deal_categories_and_stages(self):
+        """
+        Получает все воронки и их этапы.
+        """
+
+        method = 'crm.dealcategory.list'
+        result = await self._request(method, {})
+
+        if not self._check_response(result, "result"):
+            return None
+
+        categories = result.get("result", [])
+        all_stages = {}
+        categories.append({'ID': '0'})
+        for category in categories:
+            category_id = category.get('ID')
+            if not category_id:
+                continue
+
+            method = 'crm.dealcategory.stage.list'
+            params = {'id': category_id}
+            stages_result = await self._request(method, params)
+
+            if not self._check_response(stages_result, "result"):
+                continue
+
+            stages = stages_result.get("result", [])
+            for stage in stages:
+
+                status_id = stage.get('STATUS_ID')
+                if status_id:
+                    all_stages[status_id] = [stage.get("NAME", ""), stage.get("SORT", 0)]
+        return all_stages if all_stages else None
+

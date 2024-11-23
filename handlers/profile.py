@@ -16,9 +16,15 @@ async def show_profile(message: Message) -> None:
     company_id = await cache_manager.get_company_id(chat_id)
     orders = await cache_manager.get_orders(company_id)
     contact_id = await bitrix.get_contact_id_by_company_id(company_id)
-    full_name = await bitrix.get_full_name_by_contact_id(contact_id)
+    if contact_id:
+        full_name = await bitrix.get_full_name_by_contact_id(contact_id)
+    else:
+        full_name = ''
     manager_id = await bitrix.get_assigned_by_id(company_id)
-    manager_name = await bitrix.get_responsible_name(manager_id)
+    if manager_id:
+        manager_name = await bitrix.get_responsible_name(manager_id)
+    else:
+        manager_name = ''
     company_title = await bitrix.get_company_title_by_id(company_id)
 
     orders = orders or []
