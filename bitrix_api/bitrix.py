@@ -45,7 +45,8 @@ class BitrixAPI:
         method = 'crm.duplicate.findbycomm'
         params = {
             'type': 'PHONE',
-            'values[]': phone_number
+            'values[]': [phone_number],
+            'entity_type': 'COMPANY'
         }
         result = await self._request(method, params)
 
@@ -165,12 +166,12 @@ class BitrixAPI:
             "responsible_name": responsible_name,
             "id": order["ID"],
             "amount": order.get("OPPORTUNITY", 0),
-            "responsible_rp": order.get("UF_CRM_1591784142", "Не указан"),                               # Ответственный РП
-            "shipping_date": get_field_value('UF_CRM_1593059797889', "Не указан"),           # Дата отгрузки
-            "otk_transfer_date": get_field_value('UF_CRM_1593059727643', "Не указан"),       # Дата передачи в ОТК
-            "materials_delivery_date": get_field_value('UF_CRM_1593016707093', "Не указан"), # Дата поставки материалов
+            "responsible_rp": order.get("UF_CRM_1591784142", "Не указан"),  # Ответственный РП
+            "shipping_date": get_field_value('UF_CRM_1593059797889', "Не указан"),  # Дата отгрузки
+            "otk_transfer_date": get_field_value('UF_CRM_1593059727643', "Не указан"),  # Дата передачи в ОТК
+            "materials_delivery_date": get_field_value('UF_CRM_1593016707093', "Не указан"),  # Дата поставки материалов
 
-            "payment_percent": get_field_value('UF_CRM_1682643592', "Не указан"),         # Процент оплаты сделки
+            "payment_percent": get_field_value('UF_CRM_1682643592', "Не указан"),  # Процент оплаты сделки
 
             "responsible_id": responsible_id,
 
@@ -199,36 +200,87 @@ class BitrixAPI:
         logger.info(f"Продукты для заказа с ID={order_id} не найдены.")
         return "Состав сделки не указан."
 
-    async def find_folder_by_order_id(self, order_id: int) -> str | None:
+    async def find_folder_by_order_id(self, order_id: int, company_title: str, parent_id: str = "18818") -> str | None:
         """
-        Ищет папку по ID заказа и возвращает публичную ссылку, если найдена.
+        Рекурсивный метод поиска папки по ID заказа с учетом сортировки, фильтрации и пагинации.
+
+        Как работает:
+
+        В пределах папки "заявки" проверяет каждую папку на наличие папки с id заказа в названии
+
+        Если в папке "заявки" есть папка, с названием, совпадающим с названием компании,
+        то в первую очередь поиск папки осуществляется там.
         """
-        method = 'disk.folder.search'
-        params = {
-            'filter[NAME]': str(order_id),
-            'filter[TYPE]': 'folder'
-        }
+        method = 'disk.folder.getChildren'
+        start = 0
+        found_folders = []
 
-        result = await self._request(method, params)
+        while True:
+            params = {
+                'id': parent_id,
+                'filter[TYPE]': 'folder',
+                'start': start
+            }
 
-        if self._check_response(result, "result"):
-            for folder in result["result"]:
-                if str(order_id) in folder.get("NAME", ""):
-                    public_link = await self.get_public_link(folder["ID"])
-                    if public_link:
-                        logger.info(f"Найдена папка для заказа ID={order_id}, публичная ссылка: {public_link}")
-                        return public_link
-            logger.info(f"Папка с ID заказа {order_id} не найдена.")
-        else:
-            logger.warning(f"Ошибка или пустой результат поиска папки для заказа ID={order_id}.")
+            result = await self._request(method, params)
+
+            if not self._check_response(result, "result"):
+                break
+
+            folders = result.get("result", [])
+            found_folders.extend(folders)
+
+            if not folders:
+                break
+
+            start += len(folders)
+
+        folders = sorted(
+            found_folders,
+            key=lambda folder: folder.get("UPDATE_TIME", ""),
+            reverse=True
+        )
+
+        for folder in folders:
+            folder_name = folder.get("NAME", "")
+            folder_id = folder.get("ID", "")
+
+            if folder_name.lower() == company_title.lower():
+                logger.info(f"Найдена папка компании '{company_title}' (ID={folder_id}).")
+
+                subfolder_link = await self.find_folder_by_order_id(order_id, company_title, parent_id=folder_id)
+                if subfolder_link:
+                    return subfolder_link
+
+        for folder in folders:
+            folder_name = folder.get("NAME", "")
+            folder_id = folder.get("ID", "")
+
+            if any(
+                    part.isdigit() and len(part) >= 4 and part != str(order_id)
+                    for part in folder_name.split()
+            ):
+                continue
+
+            if str(order_id) in folder_name:
+                public_link = await self.get_public_link(folder_id)
+                if public_link:
+                    logger.info(f"Найдена папка для заказа ID={order_id}, публичная ссылка: {public_link}")
+                    return public_link
+                logger.error(f"Не удалось получить публичную ссылку для папки ID={folder_id}.")
+
+            subfolder_link = await self.find_folder_by_order_id(order_id, company_title, parent_id=folder_id)
+            if subfolder_link:
+                return subfolder_link
+
         return None
 
     async def get_public_link(self, folder_id: int) -> str | None:
         """
         Получить публичную ссылку на папку.
         """
-        method = 'disk.folder.getexternallink'
-        params = {'id': folder_id}
+        method = 'disk.folder.getExternalLink'
+        params = {'id': str(folder_id)}
         result = await self._request(method, params)
 
         if self._check_response(result, "result"):
@@ -356,4 +408,3 @@ class BitrixAPI:
                 if status_id:
                     all_stages[status_id] = [stage.get("NAME", ""), stage.get("SORT", 0)]
         return all_stages if all_stages else None
-
