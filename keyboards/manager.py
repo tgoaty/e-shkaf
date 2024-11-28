@@ -5,7 +5,8 @@ def manager_menu():
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="Список заказов")],
-            [KeyboardButton(text="Профиль")]
+            [KeyboardButton(text="Профиль")],
+            [KeyboardButton(text="Связаться с поддержкой")]
         ],
         resize_keyboard=True
     )

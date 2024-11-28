@@ -4,7 +4,7 @@ from keyboards import auth_menu
 
 start_router = Router()
 
-
+@start_router.message(F.text == "Попробовать снова")
 @start_router.message(F.text == "/start")
 async def cmd_start(message: Message) -> None:
     """

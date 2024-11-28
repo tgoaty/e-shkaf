@@ -116,7 +116,7 @@ class BitrixAPI:
         last_name = await self.get_user_field(responsible_id, 'LAST_NAME')
         return f"{name or ''} {last_name or ''}".strip()
 
-    async def get_site_by_assigned_id(self, assigned_by_id: int | None) -> str:
+    async def get_site_by_assigned_id(self, assigned_by_id: int | None) -> str | None:
         """
         Получает телеграмм username из поля сайт (PERSONAL_WWW) ответственного менеджера по его ID (ASSIGNED_BY_ID).
         """
@@ -136,9 +136,9 @@ class BitrixAPI:
                 logger.info(f"Username для пользователя с ID={assigned_by_id}: {user_site}")
                 return user_site
             logger.warning(f"Username для пользователя с ID={assigned_by_id} отсутствует.")
-            return " Username не указан"
+            return None
         logger.error(f"Ошибка получения данных пользователя с ID={assigned_by_id}.")
-        return "Ошибка получения данных пользователя"
+        return None
 
     async def get_order_details(self, order_id: int) -> dict | None:
         """

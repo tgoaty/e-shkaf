@@ -1,5 +1,9 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from os import getenv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 help_router = Router()
 
@@ -9,8 +13,11 @@ async def general_manager(message: Message):
     """
     Переводим в чат поддержки при технической ошибке.
     """
-    username = "tgoaty"  # Username работника поддержки
-    help_message = "Здравствуйте. Не получается зайти в бота."
+
+
+    username = getenv("HELPER_USERNAME")  # Username работника поддержки
+
+    help_message = ""
     await message.answer(
         text=(
             f"Здравствуйте! Если у вас возникли трудности, вы можете обратиться за помощью в этот "

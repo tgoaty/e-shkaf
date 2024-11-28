@@ -14,14 +14,18 @@ async def order_manager(callback_query: CallbackQuery):
     _, manager_id, order_id = callback_query.data.split("_")
     name = await bitrix.get_responsible_name(manager_id)
     username = await bitrix.get_site_by_assigned_id(manager_id)
-    message_to_manager = (
-        f"Здравствуйте {name.split()[0]}, хотелось бы уточнить информацию по поводу заказа номер {order_id}."
-    )
-    await callback_query.message.answer(
-        text=(
+    if username:
+        message_to_manager = (
+            f"Здравствуйте {name.split()[0]}, хотелось бы уточнить информацию по поводу заказа номер {order_id}."
+        )
+        text = (
             f"Здравствуйте, вы можете обратиться к нашему менеджеру в этом "
             f"[чате](https://t.me/{username}?text={message_to_manager})"
-        ),
+        )
+    else:
+        text = "Контакт вашего менеджера не найдет, обратитесь в нашу поддержку"
+    await callback_query.message.answer(
+        text=text,
         reply_markup=manager_menu(),
         parse_mode="Markdown",
     )
@@ -33,17 +37,23 @@ async def general_manager(message: Message):
     Связь с менеджером по компании.
     """
     company_id = await cache_manager.get_company_id(message.chat.id)
+    company_data = await bitrix.get_company_title_and_inn_by_id(company_id)
     manager_id = await bitrix.get_assigned_by_id(company_id)
     name = await bitrix.get_responsible_name(manager_id)
     username = await bitrix.get_site_by_assigned_id(manager_id)
-    message_to_manager = (
-        f"Здравствуйте {name.split()[0]}, хотелось бы уточнить информацию по компании номер {company_id}."
-    )
-    await message.answer(
-        text=(
+
+    if username:
+        message_to_manager = (
+            f"Здравствуйте {name.split()[0]}, хотелось бы уточнить информацию по компании {company_data['title']} ({company_id})."
+        )
+        text = (
             f"Здравствуйте, вы можете обратиться к нашему менеджеру в этом "
             f"[чате](https://t.me/{username}?text={message_to_manager})"
-        ),
+        )
+    else:
+        text = "Контакт вашего менеджера не найдет, обратитесь в нашу поддержку"
+    await message.answer(
+        text=text,
         reply_markup=manager_menu(),
         parse_mode="Markdown",
     )

@@ -6,7 +6,6 @@ from keyboards import main_menu, help_menu
 
 auth_router = Router()
 
-
 @auth_router.message(F.contact)
 async def handle_contact(message: Message):
     """
