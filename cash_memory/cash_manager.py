@@ -49,7 +49,7 @@ class GlobalCacheManager:
             await self.storage.set_data(key=order_id, data=data)
         return data["details"]
 
-    async def get_deal_categories(self, refresh: bool = False) -> list:
+    async def get_deal_categories(self) -> list:
         """
         Получает или кэширует список категорий сделок.
         """
@@ -61,3 +61,11 @@ class GlobalCacheManager:
             await self.storage.set_data(key="stages", data=data)
         return data["stages"]
 
+    async def folder_id(self, order_id: str, company_title: str):
+        data = await self.storage.get_data(key=order_id + 'f')
+
+        if "folder_id" not in data:
+            folder_id = await self.bitrix.get_folder_id_by_order_id(order_id, company_title)
+            data["folder_id"] = folder_id
+            await self.storage.set_data(key=order_id + 'f', data=data)
+        return data["folder_id"]

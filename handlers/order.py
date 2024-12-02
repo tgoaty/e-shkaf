@@ -1,8 +1,6 @@
-import datetime
-
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from create_bot import bitrix, cache_manager
+from create_bot import cache_manager
 
 order_router = Router()
 
@@ -48,43 +46,3 @@ async def show_order_details(callback_query: CallbackQuery) -> None:
 
     await callback_query.message.edit_text(description, reply_markup=back_button, parse_mode="Markdown")
     await callback_query.answer()
-
-
-@order_router.callback_query(F.data.startswith("generate_link_"))
-async def generate_public_link(callback_query: CallbackQuery) -> None:
-    """
-    Генерация публичной ссылки на папку с файлами о заказе.
-    """
-    order_id = callback_query.data.split("_")[2]
-
-    # Уведомление пользователя, что идет процесс поиска папки
-    await callback_query.message.answer("Ищем папку заказа...")
-
-    # Получение ID компании и названия компании
-    try:
-        company_id = await cache_manager.get_company_id(callback_query.message.chat.id)
-        company_data = await bitrix.get_company_title_and_inn_by_id(company_id)
-        company_title = company_data[('company_title'
-                                      '')]
-    except Exception as e:
-        await callback_query.answer(f"Ошибка при получении данных компании: {e}", show_alert=True)
-        return
-
-    # Попытка получить публичную ссылку
-    try:
-        public_link = await bitrix.find_folder_by_order_id(order_id, company_title)
-    except Exception as e:
-        await callback_query.answer(f"Ошибка при генерации ссылки: {e}", show_alert=True)
-        return
-
-    if not public_link:
-        await callback_query.message.answer("Не удалось найти папку заказа. Повторите попытку позже.")
-        return
-
-    # Отправка сообщения с публичной ссылкой
-    await callback_query.message.answer(
-        text=f"Вот ссылка на папку заказа:\n[Перейти к папке]({public_link})",
-        disable_web_page_preview=True,
-        parse_mode="Markdown"
-    )
-

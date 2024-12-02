@@ -1,7 +1,8 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.enums import ChatAction
 from keyboards import profile_menu
-from create_bot import bitrix, cache_manager
+from create_bot import bitrix, cache_manager, bot
 
 profile_router = Router()
 
@@ -12,6 +13,8 @@ async def show_profile(message: Message) -> None:
     Вывод общей информации о клиенте.
     """
     chat_id = message.from_user.id
+
+    await bot.send_chat_action(chat_id, ChatAction.TYPING)
 
     company_id = await cache_manager.get_company_id(chat_id)
     orders = await cache_manager.get_orders(company_id)

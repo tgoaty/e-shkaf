@@ -9,12 +9,13 @@
 5. Создать в корне проекта и заполнить файл .env по образцу:
     ```
     TELEGRAM_TOKEN=<ТОКЕН БОТА>
+   
+    HELPER_USERNAME=tgoaty (телеграм username человека из техподдержки)
 
     BITRIX_BASE_URL=https://b24.electroshkaf.su/rest/1/
     BITRIX_ACCESS_TOKEN=<ТОКЕН АВТОРИЗАЦИИ>
 
     PG_LINK=<ССЫЛКА ДЛЯ РАБОТЫ С БАЗОЙ ДАННЫХ>
    ```
-6. В фале handlers/help.py указать username специалиста техподдержки
-7. Запустить бота ```python aiogram_run.py```
+6. Запустить бота ```python aiogram_run.py```
 

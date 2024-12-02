@@ -200,16 +200,9 @@ class BitrixAPI:
         logger.info(f"Продукты для заказа с ID={order_id} не найдены.")
         return "Состав сделки не указан."
 
-    async def find_folder_by_order_id(self, order_id: int, company_title: str, parent_id: str = "18818") -> str | None:
+    async def get_folder_id_by_order_id(self, order_id: int, company_title: str, parent_id: str = "18818") -> str | None:
         """
-        Рекурсивный метод поиска папки по ID заказа с учетом сортировки, фильтрации и пагинации.
-
-        Как работает:
-
-        В пределах папки "заявки" проверяет каждую папку на наличие папки с id заказа в названии
-
-        Если в папке "заявки" есть папка, с названием, совпадающим с названием компании,
-        то в первую очередь поиск папки осуществляется там.
+        Рекурсивный метод поиска ID папки по ID заказа.
         """
         method = 'disk.folder.getChildren'
         start = 0
@@ -248,9 +241,9 @@ class BitrixAPI:
             if folder_name.lower() == company_title.lower():
                 logger.info(f"Найдена папка компании '{company_title}' (ID={folder_id}).")
 
-                subfolder_link = await self.find_folder_by_order_id(order_id, company_title, parent_id=folder_id)
-                if subfolder_link:
-                    return subfolder_link
+                subfolder_id = await self.get_folder_id_by_order_id(order_id, company_title, parent_id=folder_id)
+                if subfolder_id:
+                    return subfolder_id
 
         for folder in folders:
             folder_name = folder.get("NAME", "")
@@ -263,21 +256,18 @@ class BitrixAPI:
                 continue
 
             if str(order_id) in folder_name:
-                public_link = await self.get_public_link(folder_id)
-                if public_link:
-                    logger.info(f"Найдена папка для заказа ID={order_id}, публичная ссылка: {public_link}")
-                    return public_link
-                logger.error(f"Не удалось получить публичную ссылку для папки ID={folder_id}.")
+                logger.info(f"Найдена папка для заказа ID={order_id} (ID={folder_id}).")
+                return folder_id
 
-            subfolder_link = await self.find_folder_by_order_id(order_id, company_title, parent_id=folder_id)
-            if subfolder_link:
-                return subfolder_link
+            subfolder_id = await self.find_folder_id(order_id, company_title, parent_id=folder_id)
+            if subfolder_id:
+                return subfolder_id
 
         return None
 
-    async def get_public_link(self, folder_id: int) -> str | None:
+    async def get_public_link(self, folder_id: str) -> str | None:
         """
-        Получить публичную ссылку на папку.
+        Получить публичную ссылку на папку по ID.
         """
         method = 'disk.folder.getExternalLink'
         params = {'id': str(folder_id)}
@@ -287,6 +277,7 @@ class BitrixAPI:
             public_link = result["result"]
             logger.info(f"Публичная ссылка для папки ID={folder_id}: {public_link}")
             return public_link
+
         logger.error(f"Публичная ссылка для папки ID={folder_id} отсутствует или произошла ошибка.")
         return None
 
