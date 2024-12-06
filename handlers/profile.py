@@ -32,7 +32,6 @@ async def show_profile(message: Message) -> None:
 
     orders = orders or []
     total_orders_amount = sum(float(order.get("amount", 0)) for order in orders)
-    default_discount = 0
 
     profile_text = (
         f"{full_name}\n"
@@ -40,7 +39,6 @@ async def show_profile(message: Message) -> None:
         f"ИНН: {company_info["inn"]}\n"
         f"Заказы в работе: {len(orders)}\n"
         f"Сумма заказов: {total_orders_amount}\n"
-        f"Ваша скидка: {default_discount}%\n"
         f"Менеджер: {manager_name}\n"
     )
 

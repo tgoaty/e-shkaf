@@ -6,8 +6,27 @@ order_router = Router()
 
 
 def format_date(date_str):
-    year, month, day = date_str.split('T')[0].split('-')
-    return '.'.join([day, month, year])
+    if not date_str:
+        return "Не указана"
+
+    try:
+        date_part = date_str.split('T')[0]
+        year, month, day = date_part.split('-')
+        return '.'.join([day, month, year])
+    except (ValueError, AttributeError):
+        # Логгируем некорректное значение для анализа
+        print(f"Некорректный формат даты: {date_str}")
+        return "Некорректный формат"
+
+
+def format_percent(percent):
+    if percent == '165':
+        return 'Оплачено 100%'
+    if percent == '166':
+        return 'Сделка оплачена не полностью'
+    if percent == '167':
+        return 'Сделка не оплачена'
+    return 'Не указан'
 
 
 @order_router.callback_query(F.data.startswith("order_"))
@@ -31,10 +50,8 @@ async def show_order_details(callback_query: CallbackQuery) -> None:
         f"ID: {details['id']}\n"
         f"Сумма сделки: {details['amount']}\n"
         f"Ответственный РП {details['responsible_rp']}\n"
-        f"Дата отгрузки: {format_date(details['shipping_date'])}\n"
-        f"Дата передачи в ОТК: {format_date(details['otk_transfer_date'])}\n"
-        f"Дата поставки материалов: {format_date(details['materials_delivery_date'])}\n"
-        f"Процент оплаты сделки: {details['payment_percent']}%\n"
+        f"Дата отгрузки по договору: {format_date(details['shipping_date'])}\n"
+        f"Процент оплаты: {format_percent(details['payment_percent'])}\n"
     )
 
     back_button = InlineKeyboardMarkup(inline_keyboard=[

@@ -67,6 +67,7 @@ class BitrixAPI:
         params = {
             'filter[COMPANY_ID]': company_id,
             'filter[TYPE_ID]': 'SALE',
+            'filter[CATEGORY_ID]': [2, 3],  # Фильтр по воронкам
             'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
         }
 
@@ -157,21 +158,25 @@ class BitrixAPI:
         responsible_id = order.get('ASSIGNED_BY_ID')
         responsible_name = await self.get_responsible_name(responsible_id)
 
+        responsible_rp_id = order.get('UF_CRM_1591784142', None)
+        if responsible_rp_id:
+            responsible_rp_name = await self.get_responsible_name(responsible_rp_id)
+        else:
+            responsible_rp_name = "Не указан"
+
         def get_field_value(field: str, default: str = "Не указана") -> str:
             return order.get(field, default)
 
         order_details = {
-            "title": order["TITLE"],
-            "status": await get_normal_status_name(order["STAGE_ID"]),
+            "title": get_field_value('TITLE', 'Не указано'),
+            "status": await get_normal_status_name(order.get("STAGE_ID", "")),
             "responsible_name": responsible_name,
             "id": order["ID"],
             "amount": order.get("OPPORTUNITY", 0),
-            "responsible_rp": order.get("UF_CRM_1591784142", "Не указан"),  # Ответственный РП
-            "shipping_date": get_field_value('UF_CRM_1593059797889', "Не указан"),  # Дата отгрузки
-            "otk_transfer_date": get_field_value('UF_CRM_1593059727643', "Не указан"),  # Дата передачи в ОТК
-            "materials_delivery_date": get_field_value('UF_CRM_1593016707093', "Не указан"),  # Дата поставки материалов
+            "responsible_rp": responsible_rp_name,  # Ответственный РП
+            "shipping_date": get_field_value('UF_CRM_1593059797889', None),  # Дата отгрузки по договору
 
-            "payment_percent": get_field_value('UF_CRM_1682643592', "Не указан"),  # Процент оплаты сделки
+            "payment_percent": get_field_value('UF_CRM_1733280946181', "Не указан"),  # Процент оплаты
 
             "responsible_id": responsible_id,
 
@@ -259,7 +264,7 @@ class BitrixAPI:
                 logger.info(f"Найдена папка для заказа ID={order_id} (ID={folder_id}).")
                 return folder_id
 
-            subfolder_id = await self.find_folder_id(order_id, company_title, parent_id=folder_id)
+            subfolder_id = await self.get_folder_id_by_order_id(order_id, company_title, parent_id=folder_id)
             if subfolder_id:
                 return subfolder_id
 
