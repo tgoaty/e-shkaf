@@ -48,8 +48,8 @@ async def show_order_details(callback_query: CallbackQuery) -> None:
         f"Статус сделки: {details['status']}\n"
         f"Ответственный: {details['responsible_name']}\n"
         f"ID: {details['id']}\n"
-        f"Сумма сделки: {details['amount']}\n"
-        f"Ответственный РП {details['responsible_rp']}\n"
+        f"Сумма сделки: {details['amount']}₽\n"
+        f"Ответственный РП: {details['responsible_rp']}\n"
         f"Дата отгрузки по договору: {format_date(details['shipping_date'])}\n"
         f"Процент оплаты: {format_percent(details['payment_percent'])}\n"
     )

@@ -38,7 +38,7 @@ async def show_profile(message: Message) -> None:
         f"Организация: {company_info["company_title"]}\n"
         f"ИНН: {company_info["inn"]}\n"
         f"Заказы в работе: {len(orders)}\n"
-        f"Сумма заказов: {total_orders_amount}\n"
+        f"Сумма заказов: {total_orders_amount}₽\n"
         f"Менеджер: {manager_name}\n"
     )
 
