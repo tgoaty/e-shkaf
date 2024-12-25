@@ -32,7 +32,7 @@
    
     HELPER_USERNAME=tgoaty (телеграм username человека из техподдержки)
 
-    BITRIX_BASE_URL=https://b24.electroshkaf.su/rest/1/
+    BITRIX_BASE_URL=https://b24.electroshkaf.su/rest/246/
     BITRIX_ACCESS_TOKEN=<ТОКЕН АВТОРИЗАЦИИ>
 
     PG_LINK=<ССЫЛКА ДЛЯ РАБОТЫ С БАЗОЙ ДАННЫХ>
