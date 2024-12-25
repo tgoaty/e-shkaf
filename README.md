@@ -25,17 +25,23 @@
         postgres://<username>:<password>@<host>:<port>/<database>?sslmode=disable
         postgres://myuser:mypassword@localhost:5432/mydb?sslmode=disable
         ```
-     4. Добавьте эту строку в файл `.env` как значение переменной `PG_LINK`.  
-7. Создать в корне проекта и заполнить файл .env по образцу:
+     4. Добавьте эту строку в файл `.env` как значение переменной `PG_LINK`.
+6. Получить Домен и Токен Авторизации из битрикс:
+ - Разработчикам -> Интеграции -> Выбираем нужную интеграцию -> Редактировать
+ - Смотрим на поле Вебхук для вызова rest api
+ - Пример: https://b24.el.ru/rest/2/asdfasdfasdf/
+ - Такен авторизации - набор цифр и буков в концу (в примере asdfasdfasdf)
+ - Домен остальная часть ссылки (в примере https://b24.el.ru/rest/2/)
+8. Создать в корне проекта и заполнить файл .env по образцу:
     ```
     TELEGRAM_TOKEN=<ТОКЕН БОТА>
    
     HELPER_USERNAME=tgoaty (телеграм username человека из техподдержки)
 
-    BITRIX_BASE_URL=https://b24.electroshkaf.su/rest/246/
+    BITRIX_BASE_URL=<ДОМЕН БИТРИКСА>
     BITRIX_ACCESS_TOKEN=<ТОКЕН АВТОРИЗАЦИИ>
 
     PG_LINK=<ССЫЛКА ДЛЯ РАБОТЫ С БАЗОЙ ДАННЫХ>
    ```
-8. Запустить бота ```python aiogram_run.py```
+9. Запустить бота ```python aiogram_run.py```
 
